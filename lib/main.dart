@@ -101,17 +101,7 @@ class _PhotoPickerState extends State<PhotoPicker> {
                   _selectedList.add(asset);
                   return !selected;
                 }
-
-                // Show toast telling you have reached max number
-                // Scaffold.of(context).showSnackBar(SnackBar(
-                //       content: Text("Max number of photos is selected"),
-                //     ));
                 return selected;
-                // if (selected) {
-                //   _selectedList.add(asset);
-                // } else {
-                //   _selectedList.remove(asset);
-                // }
               }),
         );
       }
