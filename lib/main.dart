@@ -26,17 +26,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  List<AssetEntity> _imageList = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(child: Text('Pick a photo')),
+      body: _imageList.length == 0
+          ? Center(child: Text('Pick a photo'))
+          : ListView.builder(
+              itemCount: _imageList.length,
+              itemBuilder: (context, index) {
+                return FutureBuilder(
+                  future: _imageList[index].thumbDataWithSize(200, 200),
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done)
+                      return Image.memory(
+                        snapshot.data,
+                        fit: BoxFit.cover,
+                      );
+                    return Container();
+                  },
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          print("Go and pick a Photo");
-
           var result = await Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PhotoPicker(),
@@ -45,6 +62,9 @@ class _MyHomePageState extends State<MyHomePage> {
           );
           if (result != null) {
             print("Done picking: $result");
+            setState(() {
+              _imageList = result;
+            });
           } else {
             print("Canceled the picking");
           }
@@ -83,10 +103,8 @@ class _PhotoPickerState extends State<PhotoPicker> {
       //load the album list
       List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
           onlyAll: true, type: RequestType.image);
-      print(albums);
       List<AssetEntity> media =
           await albums[0].getAssetListPaged(currentPage, 60);
-      print(media);
       List<Widget> temp = [];
       for (var asset in media) {
         temp.add(
@@ -129,7 +147,6 @@ class _PhotoPickerState extends State<PhotoPicker> {
           actions: <Widget>[
             FlatButton(
               onPressed: () {
-                print("Done picking images");
                 Navigator.of(context).pop(_selectedList);
               },
               child: Text('Done'),
